@@ -1,3 +1,12 @@
+/*
+ Fichier Lumiere_JourNuit_TransmissionHorloge.cpp
+ 
+ Cette librairie permet d'allumer et éteindre des led pour simuler l'éclairage d'une scène le jour et la nuit, ainsi que d'un soleil et la synchronisation de l'heure entre plusieurs Arduino.
+ 
+ Written by Thierry MARTIN
+ LGPL License, all text above must be included in any redistribution
+*/
+
 //#define DEBUG_SERIE
 
 #include <Arduino.h>

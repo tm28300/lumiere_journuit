@@ -1,3 +1,12 @@
+/*
+ Fichier Lumiere_JourNuit.cpp
+ 
+ Cette librairie permet d'allumer et éteindre des led pour simuler l'éclairage d'une scène le jour et la nuit, ainsi que d'un soleil.
+ 
+ Written by Thierry MARTIN
+ LGPL License, all text above must be included in any redistribution
+*/
+
 #ifndef Lumiere_JourNuit_h
 #define Lumiere_JourNuit_h
 
@@ -26,10 +35,10 @@ class LumiereJourNuit {
         // Si le délai pour une minute n'est pas précisé alors le mode est toujours esclave
         void loop ();
         void next (); // Minute suivante
-    protected:
-        horaire get_heure_simulee () {
+        horaire get_heure_simulee () { // Permet de lire l'heure simulée afin d'ajouter des fonctions dans la boucle
           return _heure_simulee;
         }
+    protected:
         void set_heure_simulee (uint8_t nouvelle_heure, uint8_t nouvelle_minute) {
           _heure_simulee = nouvelle_heure * 60 + nouvelle_minute;
         }
