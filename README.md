@@ -39,7 +39,7 @@ const struct parametres_activite liste_activites [] = {
 const size_t nb_activites = sizeof (liste_activites) / sizeof (struct parametres_activite);
 ```
 
-3. Déclarer l'objet LumiereJourNuit qui permet d'effectuer les tâches principales, par exemple :
+3. Déclarer l'objet lumiere_jour_nuit de classe LumiereJourNuit qui permet d'effectuer les tâches principales, par exemple :
 
 ```
 LumiereJourNuit lumiere_jour_nuit (liste_activites, nb_activites, NULL, 0, 255);
@@ -65,6 +65,14 @@ Ainsi, la librairie va allumer et éteindre régulièrement les led connectées 
 
 Lors du démarrage de l'Arduino, ou après téléversement du programme, l'horloge simulée commence à 0h.
 
+## Auteur et licence
+
+Cette librairie est distribuée gratuitement et sans aucune garantie, sous licence LGPL version 2.1 ou supérieure.
+
+Cette librairie a été écrite par Thierry MARTIN, e-mail [lumiere_journuit@martin-thierry.nom.fr](mailto:lumiere_journuit@martin-thierry.nom.fr).
+
+Si vous distribuez ou adaptez la librairie, vous devez laisser mon nom et conserver cette licence.
+
 ## Explications détaillées
 
 ### Initialisation de la planification
@@ -77,7 +85,7 @@ Pour le cas particulier où vous souhaitez laisser allumée une led autour de mi
 
 ### Création de l'objet lumiere_jour_nuit
 
-L'initialisation de l'objet `lumiere_jour_nuit` nécessite 5 paramètres. Dans le premier exemple, seuls les 2 premiers sont réellement utilisés. Les 3 derniers sont détaillés plus loin pour la simulation du soleil.
+La création (instentation) de l'objet `lumiere_jour_nuit` nécessite 5 paramètres. Dans le premier exemple, seuls les 2 premiers sont réellement utilisés. Les 3 derniers sont détaillés plus loin pour la simulation du soleil.
 
 Le premier paramètre est le tableau `liste_activites` et le second son nombre de lignes. La ligne de code commençant par `const site_t nb_activites` n'a pas besoin d'être modifiée, car elle permet de calculer le nombre de lignes. Le nombre de lignes est obtenu en divisant la taille totale utilisée par le tableau par la taille d'une ligne d'horaire.
 
@@ -98,7 +106,7 @@ La décomposition du traitement en deux parties permet d'insérer d'autres fonct
 
 En plus de la déclaration de la liste des activités, décrite ci-dessus, il est possible de simuler l'éclairage du soleil au moyen d'un bandeau de led. Ces led vont s'allumer progressivement, rester au maximum pendant la journée puis la lumière décroît et enfin s'éteint pour la nuit.
 
-Pour cela vous allez définir une seconde planification pour indiquer les heures de changement de luminosité et la luminosité atteinte à chacune de ces heures. Afin de simplifier le planing, la luminosité est indiqué en pourcentage, la valeur 100 permettant d'allumer les led au maximum. Le programme va calculer la progression à faire, minute par minute, entre les deux horaires consécutifs, afin d'ajuster l'intensité de la lumière des led qui simulent le soleil. Il est important d'indiquer les horaires dans l'ordre, sinon le calcul ne va pas fonctionner.
+Pour cela vous allez définir une seconde planification pour indiquer les heures de changement de luminosité et la luminosité atteinte à chacune de ces heures. Afin de simplifier le planning, la luminosité est indiqué en pourcentage, la valeur 100 permettant d'allumer les led au maximum. Le programme va calculer la progression à faire, minute par minute, entre les deux horaires consécutifs, afin d'ajuster l'intensité de la lumière des led qui simulent le soleil. Il est important d'indiquer les horaires dans l'ordre, sinon le calcul ne va pas fonctionner.
 
 Par exemple la planification peut être définie comme suit :
 
@@ -122,7 +130,7 @@ Cette liste de planification doit être ajoutée après celle d'allumage des led
 const size_t nb_horaires_soleil = sizeof (liste_parametres_soleil) / sizeof (struct parametres_soleil);
 ```
 
-Vous pouvez définir une constante avec le numéro de la borne de l'Arduino utilisée pour connecter le bandeau de led :
+Vous pouvez définir une constante avec le numéro de la borne de l'Arduino utilisée pour connecter le bandeau de led. Il faut utiliser une sortie Arduino pouvant fonctionner en PWM afin que la lumière puisse varier. Le code est par exemple le suivant :
 
 ```
 const uint8_t pin_soleil = 3; // Nécessite PWM
@@ -150,11 +158,37 @@ Ce paragraphe décrit comment vous pouvez assembler deux scènes indépendantes 
 
 Par contre, le soleil de chaque scène reste indépendant. Si, par exemple, une scène simule un soleil d'hiver et l'autre d'été, alors l'horaire de lever et coucher du soleil sera différent. Mais le décalage reste constant pendant toute la durée de l'illumination.
 
+J'ai choisi un bus RS485 car, il permet :
+
+* De connecter un nombre quelconque d'Arduino.
+* D'avoir la même connexion pour le maître et l'esclave.
+* De utiliser que deux fils.
+* D'isoler électriquement les Arduino.
+* De plus, pour le modélisme ferroviaire, ce bus est aussi utilisé pour connecter une multimaus à une centrale DCC.
+
 ### Détail du code
 
-[TODO]
+L'objet `lumiere_jour_nuit` doit être créé à partir de la classe `LumiereJourNuitHorlogeTransmise` au lieu de la classe `LumiereJourNuit` utilisée précédement. Trois nouveaux paramètres permettent d'indiquer les connexions de l'Arduino utilisées pour cummuniquer avec la carte MAX_485 (voir le schéma de montage lié à l'exemple lumiere_jour_nuit_synchronisation. Le code est par exemple le suivant :
 
+```
+const uint8_t pin_rs485_dir = 18;
+const uint8_t pin_rs485_rx  =  2; // Nécessite une interruption
+const uint8_t pin_rs485_tx  = 19;
 
+LumiereJourNuitHorlogeTransmise lumiere_jour_nuit (liste_activites, nb_activites,
+                                                   liste_parametres_soleil, nb_horaires_soleil, pin_soleil,
+                                                   pin_rs485_rx, pin_rs485_tx, pin_rs485_dir);
+```
+
+Dans notre montage, la connexion aux MAX_485, ne nécessite que 3 fils, car les deux bornes de direction (RI et DO) sont reliées ensemble. La borne reliée à RX nécessite une interruption.
+
+L'initialisation de l'objet `lumiere_jour_nuit` nécessite un paramètre supplémentaire, qui permet d'indiquer si on force l'Arduino comme maître, ou si on laisse le premier Arduino démarrer prendre ce rôle. Le code est par exemple le suivant pour un Arduino avec détection automatique du maître :
+
+```
+  lumiere_jour_nuit.begin (delai_boucle, false);
+```
+
+Le reste du code ne change pas.
 
 ## Branchement des led
 
@@ -166,7 +200,23 @@ Par exemple, pour allumer un bandeau de led fonctionnant en 12V, j'ai trouvé un
 
 ## Exemples
 
-[TODO]
+Cette librairie est fournie avec 4 exemples. Chaque exemple est accompagné d'un schéma de test.
+
+### lumiere_jour_nuit_simple
+
+Il s'agit d'allumer et éteindre deux leds, à certaines heures et sur un cycle de 24h. Il ne comprend que le tableau parametres_activite et le code d'appel de la librairie, comme décrit dans le Résumé.
+
+### lumiere_jour_nuit_soleil
+
+Dans cet exemple, on ajoute en plus le soleil. Il comprend en plus le tableau parametres_soleil, comme décrit dans le paragraphe Simulation du soleil.
+
+### lumiere_jour_nuit_synchronisation
+
+Dans cet exemple, on ajoute la synchronisation entre plusieurs Arduino. La classe LumiereJourNuit et remplacée par LumiereJourNuitHorlogeTransmise.
+
+### lumiere_jour_nuit_generique
+
+Cet exemple commence par plusieurs macro qui peuvent être mises en commentaire. Selon que les macros sont définies ou non, cela permet d'utiliser une partie du code et d'obtenir le même résultat que l'un des trois exemples précédents. Le but est d'avoir une version plus souple pour passer d'un cas à l'autre.
 
 ## Limites
 
