@@ -13,6 +13,8 @@ Cette librairie fourni plusieurs fonctions qui permettent d'avoir :
 
 ## Résumé
 
+La librairie peut être installée en récupérant une copie du projet git ou en téléchargeant le [fichier zip](http://www.martin-thierry.nom.fr/public/Lumiere_JourNuit-1_0.zip) puis en le dézippant dans le répertoire Arduino/librairie de votre IDE.
+
 Après avoir installé cette librairie dans votre IDE Arduino, vous pouvez l'utiliser de façon simple, dans votre programme, en commençant par les étapes suivantes :
 
 1. Importer la librairie dans le code du programme :
