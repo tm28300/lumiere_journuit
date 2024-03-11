@@ -168,6 +168,14 @@ J'ai choisi un bus RS485 car, il permet :
 * D'isoler électriquement les Arduino.
 * De plus, pour le modélisme ferroviaire, ce bus est aussi utilisé pour connecter une multimaus à une centrale DCC.
 
+### Dépendence
+
+Afin de fonctionner, le bus RS485 nécessite deux librairies :
+
+* La librairie [MAX_485](https://github.com/vacmg/MAX_RS485) doit être installée. Dans la liste des librairies disponibles, elle apparaît sous le nom MAX_485 avec comme auteur Victor Arzoz @vacmg. Cette librairie ne nécessite pas une connexion série hardware, elle utilise la librairie SoftSerial.
+* La librairie SoftSerial qui permet de faire fonctionner une connexion série sur n'importe quel port. Cette librairie est installée en standard avec l'IDE. Elle nécessite que la borne reliée à RX puisse générer une interruption. La borne reliée à TX peut être n'importe quelle borne numérique.
+
+
 ### Détail du code
 
 L'objet `lumiere_jour_nuit` doit être créé à partir de la classe `LumiereJourNuitHorlogeTransmise` au lieu de la classe `LumiereJourNuit` utilisée précédement. Trois nouveaux paramètres permettent d'indiquer les connexions de l'Arduino utilisées pour cummuniquer avec la carte MAX_485 (voir le schéma de montage lié à l'exemple lumiere_jour_nuit_synchronisation. Le code est par exemple le suivant :
